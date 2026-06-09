@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Minecraft Discussion</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #8B8B7A;
+            font-family: 'Segoe UI', 'Tahoma', 'Geneva', 'Verdana', sans-serif;
+            font-size: 14px;
+            color: #1a1a1a;
+            padding: 20px;
+            line-height: 1.5;
+        }
+
+        .forum-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #C0C0C0;
+            border: 3px ridge #FFFFFF;
+            padding: 12px;
+            box-shadow: 5px 5px 0px #4a4a4a;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-window {
+            background: #C0C0C0;
+            border: 4px ridge #FFFFFF;
+            padding: 25px;
+            width: 500px;
+            max-width: 90%;
+            box-shadow: 8px 8px 0px #404040;
+            text-align: center;
+        }
+
+        .modal-window h2 {
+            margin-bottom: 20px;
+            font-family: 'Courier New', monospace;
+            text-transform: uppercase;
+        }
+
+        .modal-window input, .modal-window textarea {
+            width: 100%;
+            padding: 8px;
+            margin: 10px 0;
+            background: #F0F0E0;
+            border: 2px inset #808080;
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 14px;
+        }
+        .modal-window textarea { height: 100px; }
+
+        .modal-window button {
+            background: #A0A0A0;
+            border: 2px outset #E4E4E4;
+            padding: 8px 20px;
+            font-family: 'Segoe UI', sans-serif;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .avatar-preview {
+            margin: 10px 0;
+            text-align: center;
+        }
+        .avatar-preview img {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border: 2px solid #606060;
+            background: #A0A090;
+        }
+
+        .header {
+            background: #A7A7A7;
+            border: 2px inset #E0E0E0;
+            padding: 12px 15px;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 28px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #000000;
+            text-shadow: 2px 2px 0px #B8B8B8;
+            font-weight: normal;
+            font-family: 'Courier New', monospace;
+            margin-bottom: 6px;
+        }
+        .editable-text {
+            cursor: pointer;
+            transition: background 0.1s;
+            padding: 2px 4px;
+            border-radius: 3px;
+            display: inline-block;
+        }
+        .editable-text:hover { background: #A8A898; }
+        .tagline {
+            font-size: 12px;
+            border-top: 1px solid #808080;
+            display: inline-block;
+            padding-top: 4px;
+        }
+
+        .nav-bar {
+            background: #A0A0A0;
+            border: 2px outset #D4D0C8;
+            padding: 8px 12px;
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            font-weight: bold;
+            align-items: center;
+        }
+        .nav-bar a {
+            color: #0000A0;
+            background: #D4D0C8;
+            padding: 3px 10px;
+            text-decoration: none;
+            border: 1px solid #FFFFFF;
+            border-right-color: #404040;
+            border-bottom-color: #404040;
+            font-family: monospace;
+            font-size: 13px;
+        }
+        .nav-bar a:hover {
+            background: #B0B0B0;
+            border: 1px inset #808080;
+            color: #000080;
+        }
+        .auth-buttons {
+            display: flex;
+            gap: 8px;
+            margin-left: auto;
+        }
+        .auth-buttons button {
+            background: #808070;
+            color: white;
+            border: 1px outset #A0A090;
+            padding: 3px 12px;
+            margin: 0;
+            font-size: 12px;
+        }
+        .status-text {
+            color: #202020;
+            font-size: 11px;
+            align-self: center;
+        }
+        .admin-badge {
+            background: #8B0000;
+            color: #FFD700;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 10px;
+            margin-left: 5px;
+        }
+
+        .forum-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #B5B5A7;
+            border: 2px solid #696969;
+            margin-bottom: 24px;
+        }
+        .forum-table th {
+            background: #808080;
+            color: #FFFFFF;
+            text-align: left;
+            padding: 8px 10px;
+            border: 1px solid #A9A9A9;
+            font-weight: bold;
+            font-size: 13px;
+        }
+        .forum-table td {
+            border: 1px solid #7E7E6E;
+            padding: 10px 8px;
+            background: #D4D0C8;
+            vertical-align: top;
+        }
+        .forum-table tr:hover td { background: #C8C4B8; }
+        .topic-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .topic-title a {
+            color: #000080;
+            text-decoration: none;
+            border-bottom: 1px dotted #000080;
+            font-weight: bold;
+        }
+        .topic-title a:hover { color: #A00000; border-bottom: 1px solid #A00000; }
+        .topic-actions { position: relative; }
+        .topic-dots {
+            background: none;
+            border: none;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 0 8px;
+            color: #404040;
+            font-family: monospace;
+        }
+        .topic-dots:hover { color: #000000; }
+        .topic-delete-menu {
+            position: absolute;
+            right: 0;
+            top: 22px;
+            background: #D4D0C8;
+            border: 2px outset #E0E0E0;
+            padding: 5px 10px;
+            z-index: 10;
+            box-shadow: 2px 2px 0px #606060;
+            white-space: nowrap;
+        }
+        .stats { text-align: center; font-size: 12px; }
+        .last-post { font-size: 11px; }
+
+        .new-topic-panel, .thread-view, .guides-panel, .guide-view-panel, .storage-panel {
+            background: #A9A99A;
+            border: 3px groove #E0E0E0;
+            padding: 15px;
+            margin-bottom: 24px;
+        }
+        .thread-view, .guides-panel, .guide-view-panel, .storage-panel { background: #B8B8A8; }
+
+        .form-group { margin-bottom: 12px; }
+        .form-group label {
+            display: inline-block;
+            width: 110px;
+            font-weight: bold;
+            vertical-align: top;
+        }
+        input, textarea {
+            background: #F0F0E0;
+            border: 2px inset #808080;
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 13px;
+            padding: 6px;
+            width: 60%;
+        }
+        textarea { height: 70px; width: 60%; resize: vertical; }
+        button {
+            background: #C0C0C0;
+            border: 2px outset #E4E4E4;
+            padding: 5px 16px;
+            font-family: 'Segoe UI', sans-serif;
+            font-weight: bold;
+            font-size: 13px;
+            cursor: pointer;
+            margin-top: 6px;
+        }
+        button:active { border: 2px inset #808080; }
+
+        .post-item {
+            background: #D0CCBC;
+            border: 2px solid #8E8E7A;
+            margin-bottom: 12px;
+            padding: 12px;
+            display: flex;
+            gap: 12px;
+        }
+        .post-avatar {
+            flex-shrink: 0;
+            width: 55px;
+            text-align: center;
+            cursor: pointer;
+        }
+        .post-avatar img {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border: 2px solid #6E6E5E;
+            background: #B0A090;
+        }
+        .post-avatar .no-avatar {
+            width: 50px;
+            height: 50px;
+            background: #B0A090;
+            border: 2px solid #6E6E5E;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: #404040;
+        }
+        .post-main { flex: 1; }
+        .post-header {
+            border-bottom: 2px solid #8C8C7C;
+            padding-bottom: 5px;
+            margin-bottom: 8px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .post-author { color: #000080; }
+        .post-date { color: #3A3A2A; }
+        .post-actions { position: relative; display: inline-block; }
+        .dots-btn {
+            background: none;
+            border: none;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 0 6px;
+            color: #404040;
+            font-family: monospace;
+            margin-top: 0;
+        }
+        .dots-btn:hover { color: #000000; background: #B0AFA0; }
+        .delete-menu {
+            position: absolute;
+            right: 0;
+            top: 24px;
+            background: #D4D0C8;
+            border: 2px outset #E0E0E0;
+            padding: 5px 10px;
+            z-index: 10;
+            white-space: nowrap;
+        }
+        .post-content { font-family: 'Segoe UI', sans-serif; font-size: 13px; white-space: pre-wrap; word-break: break-word; }
+        .post-image, .post-video {
+            max-width: 100%;
+            margin-top: 10px;
+            border: 2px solid #6E6E5E;
+            background: #B0B09C;
+            padding: 4px;
+        }
+        .post-image img { max-width: 100%; max-height: 300px; display: block; }
+        .post-video video { max-width: 100%; max-height: 300px; }
+        .file-attachment {
+            margin-top: 10px;
+            padding: 6px;
+            background: #B8B4A0;
+            border: 1px solid #8E8E7A;
+            display: inline-block;
+        }
+        .file-attachment a { color: #000080; text-decoration: none; font-weight: bold; }
+        .media-preview {
+            margin-top: 5px;
+            max-width: 200px;
+            border: 1px dashed #404040;
+            background: #A0A090;
+            padding: 5px;
+        }
+        .media-preview img, .media-preview video { max-width: 100%; max-height: 100px; }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 15px;
+            background: #878777;
+            padding: 4px 12px;
+            color: #FFF;
+            text-decoration: none;
+            border: 1px solid #CDCDCD;
+            font-weight: bold;
+        }
+        .back-link:hover { background: #6A6A5A; }
+        hr { border: none; border-top: 2px groove #A0A0A0; margin: 12px 0; }
+        .footer {
+            font-size: 10px;
+            text-align: center;
+            margin-top: 20px;
+            border-top: 1px solid #808080;
+            padding-top: 12px;
+            color: #202018;
+        }
+        .datetime-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+        .datetime-row input { width: auto; }
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 15px;
+            margin-bottom: 15px;
+        }
+        .pagination button {
+            background: #A0A090;
+            border: 2px outset #C0C0B0;
+            padding: 4px 12px;
+            margin: 0;
+        }
+        .pagination button.active {
+            background: #808070;
+            border: 2px inset #A0A090;
+            color: white;
+        }
+        .stats-editable {
+            cursor: pointer;
+            background: #A0A090;
+            padding: 2px 6px;
+            border-radius: 3px;
+            display: inline-block;
+        }
+        .guide-list-item {
+            background: #D0CCBC;
+            border: 1px solid #9E9E8E;
+            margin-bottom: 8px;
+            padding: 12px;
+            cursor: pointer;
+        }
+        .guide-list-item:hover { background: #C8C4B0; }
+        .guide-list-title { font-size: 16px; font-weight: bold; color: #000080; }
+        .guide-list-meta { font-size: 11px; color: #404040; margin-top: 3px; }
+        .guide-full-content { margin-top: 15px; white-space: pre-wrap; }
+        .guide-image { margin-top: 15px; max-width: 100%; border: 2px solid #6E6E5E; background: #B0B09C; padding: 4px; }
+        .guide-image img { max-width: 100%; max-height: 300px; display: block; }
+        .guide-owner-actions { margin-top: 15px; }
+        .guide-editor { margin-top: 15px; padding: 10px; background: #A8A898; border: 1px solid #8E8E7A; }
+
+        /* Хранилище */
+        .storage-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .storage-item {
+            background: #D0CCBC;
+            border: 2px solid #8E8E7A;
+            padding: 10px;
+            text-align: center;
+        }
+        .storage-item img, .storage-item video {
+            max-width: 100%;
+            max-height: 150px;
+            margin-bottom: 8px;
+        }
+        .storage-item .file-icon {
+            font-size: 48px;
+            margin: 20px 0;
+        }
+        .storage-item-name {
+            font-size: 11px;
+            word-break: break-all;
+            background: #B8B4A0;
+            padding: 4px;
+            margin-top: 5px;
+        }
+        .storage-item-actions {
+            margin-top: 8px;
+        }
+        .storage-item-actions button {
+            padding: 2px 8px;
+            font-size: 11px;
+        }
+
+        @media (max-width: 700px) {
+            input, textarea { width: 95%; }
+            .nav-bar { flex-direction: column; }
+            .auth-buttons { margin-left: 0; }
+            .form-group label { width: 100%; margin-bottom: 4px; }
+            .post-item { flex-direction: column; }
+            .post-avatar { align-self: flex-start; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="forum-container" id="app">
+    <!-- Модальные окна -->
+    <div v-if="showLoginModal" class="modal-overlay"><div class="modal-window"><h2>ВХОД</h2><input type="text" v-model="loginName" placeholder="Никнейм"><input type="password" v-model="loginPassword" placeholder="Пароль"><button @click="doLogin">Войти</button><button @click="showLoginModal=false">Отмена</button></div></div>
+    <div v-if="showRegisterModal" class="modal-overlay"><div class="modal-window"><h2>РЕГИСТРАЦИЯ</h2><input type="text" v-model="registerName" placeholder="Никнейм"><input type="password" v-model="registerPassword" placeholder="Пароль"><button @click="doRegister">Зарегистрироваться</button><button @click="showRegisterModal=false">Отмена</button></div></div>
+    
+    <div v-if="showAvatarForUserModal && isAdmin" class="modal-overlay"><div class="modal-window"><h2>АВАТАР ДЛЯ {{ avatarTargetUser }}</h2><input type="file" @change="handleUserAvatarChange" accept="image/*"><div class="avatar-preview" v-if="userAvatarPreviewTemp"><img :src="userAvatarPreviewTemp"></div><button @click="saveUserAvatar">Сохранить</button><button @click="removeUserAvatar">Удалить</button><button @click="showAvatarForUserModal=false">Отмена</button></div></div>
+    
+    <div v-if="showGuideModal" class="modal-overlay"><div class="modal-window"><h2>{{ editingGuide ? 'Редактировать гайд' : 'Новый гайд' }}</h2><input type="text" v-model="guideFormTitle" placeholder="Название"><textarea v-model="guideFormContent" placeholder="Содержание гайда..."></textarea><div v-if="isAdmin" class="datetime-row" style="margin:10px 0;"><label>Дата/время:</label><input type="datetime-local" v-model="guideFormDateTime"></div><div class="form-group"><label>Картинка гайда:</label><input type="file" @change="handleGuideImage" accept="image/*"></div><div class="media-preview" v-if="guideFormImagePreview"><img :src="guideFormImagePreview" style="max-width:200px;"><button @click="clearGuideImage">X</button></div><button @click="saveGuide">Сохранить</button><button @click="showGuideModal=false">Отмена</button></div></div>
+
+    <div class="header">
+        <h1>MINECRAFT DISCUSSION</h1>
+        <div class="tagline"><span v-if="!isAdmin">{{ taglineText }}</span><span v-else class="editable-text" @dblclick="startEdit('tagline')">{{ taglineText }}</span><input v-if="editing.tagline && isAdmin" v-model="editValues.tagline" @blur="saveEdit('tagline')" style="width:300px; text-align:center;"></div>
+    </div>
+
+    <div class="nav-bar">
+        <a href="#" @click.prevent="changeView('index')">Главная</a>
+        <a href="#" @click.prevent="changeView('newTopic')">Новая тема</a>
+        <a href="#" @click.prevent="changeView('guides')">Гайды</a>
+        <a href="#" @click.prevent="changeView('storage')">Хранилище</a>
+        <a href="#" @click.prevent="exportData">Экспорт</a>
+        <a href="#" @click.prevent="triggerImport">Импорт</a>
+        <a href="#" @click.prevent="refreshData">Обновить</a>
+        <input type="file" ref="importFile" style="display:none" accept=".json" @change="importData">
+        <div class="auth-buttons" v-if="!myName"><button @click="showLoginModal=true">Вход</button><button @click="showRegisterModal=true">Регистрация</button></div>
+        <div class="auth-buttons" v-else><span class="status-text">Вы: {{ myName }}<span v-if="isAdmin" class="admin-badge">ADMIN</span></span><button @click="logout">Выйти</button></div>
+    </div>
+
+    <!-- Главная -->
+    <div v-if="currentView === 'index'">
+        <table class="forum-table"><thead><tr><th>Тема</th><th style="width:110px">Ответов</th><th style="width:160px">Последнее сообщение</th></tr></thead>
+            <tbody>
+                <tr v-for="topic in paginatedTopics" :key="topic.id"><td><div class="topic-title"><a href="#" @click.prevent="openThread(topic.id)">{{ topic.title }}</a><div v-if="isAdmin" class="topic-actions" @click.stop><button class="topic-dots" @click="toggleTopicDeleteMenu(topic.id)">...</button><div v-if="activeTopicDeleteMenu === topic.id" class="topic-delete-menu"><button @click="deleteTopic(topic.id)">Удалить тему</button></div></div></div><div style="font-size:10px; color:#3C3C2C;">автор: {{ topic.author }}</div></div><td class="stats">{{ topic.postsCount - 1 }}</td><td class="last-post"><span v-if="topic.lastPostAuthor">{{ topic.lastPostAuthor }}<br>{{ formatDate(topic.lastPostDate) }}</span><span v-else>-</span></td></tr>
+                <tr v-if="paginatedTopics.length === 0"><td colspan="3" style="text-align:center;">Тем пока нет. Станьте первым!</td></tr>
+            </tbody>
+        </table>
+        <div class="pagination" v-if="totalPages > 1"><button @click="prevPage" :disabled="currentPage === 1">Пред.</button><button v-for="page in totalPages" :key="page" @click="goToPage(page)" :class="{active: currentPage === page}">{{ page }}</button><button @click="nextPage" :disabled="currentPage === totalPages">След.</button></div>
+        <div style="background:#A0A090; padding:8px; text-align:right; font-size:11px;">Всего тем: <span v-if="!isAdmin">{{ displayTotalTopics }}</span><span v-else class="stats-editable" @click="startEditStats('totalTopics')">{{ displayTotalTopics }}</span><input v-if="editingStats.totalTopics && isAdmin" v-model="editStatsValues.totalTopics" @blur="saveEditStats('totalTopics')" style="width:60px; text-align:center;"> | Всего сообщений: <span v-if="!isAdmin">{{ displayTotalMessages }}</span><span v-else class="stats-editable" @click="startEditStats('totalMessages')">{{ displayTotalMessages }}</span><input v-if="editingStats.totalMessages && isAdmin" v-model="editStatsValues.totalMessages" @blur="saveEditStats('totalMessages')" style="width:80px; text-align:center;"></div>
+    </div>
+
+    <!-- Просмотр темы -->
+    <div v-if="currentView === 'thread' && currentTopic">
+        <a href="#" class="back-link" @click.prevent="changeView('index')">Назад</a>
+        <div class="thread-view">
+            <div style="background:#9E9E8E; padding:6px 10px; margin-bottom:12px;"><h2 style="font-size:18px; margin:0;"><span v-if="!isAdmin">{{ currentTopic.title }}</span><span v-else class="editable-text" @dblclick="startEdit('topicTitle')">{{ currentTopic.title }}</span><input v-if="editing.topicTitle && isAdmin" v-model="editValues.topicTitle" @blur="saveTopicTitle" style="width:400px;"></h2><small>Автор: {{ currentTopic.author }} | создано {{ formatDate(currentTopic.createdAt) }}</small></div>
+            <div v-for="post in currentPosts" :key="post.id" class="post-item">
+                <div class="post-avatar" @click="isAdmin ? openAvatarForUser(post.author) : null"><img v-if="getAvatar(post.author)" :src="getAvatar(post.author)"><div v-else class="no-avatar">?</div></div>
+                <div class="post-main">
+                    <div class="post-header"><span class="post-author">{{ post.author }}</span><div style="display: flex; align-items: center; gap: 8px;"><span class="post-date">{{ formatDate(post.createdAt) }}</span><div v-if="isAdmin" class="post-actions" @click.stop><button class="dots-btn" @click="toggleDeleteMenu(post.id)">...</button><div v-if="activeDeleteMenu === post.id" class="delete-menu"><button @click="deletePost(post.id)">Удалить</button></div></div></div></div>
+                    <div class="post-content">{{ post.text }}</div>
+                    <div v-if="post.mediaData && post.mediaType === 'image'" class="post-image"><img :src="post.mediaData" alt="image"></div>
+                    <div v-if="post.mediaData && post.mediaType === 'video'" class="post-video"><video controls :src="post.mediaData"></video></div>
+                    <div v-if="post.fileData && post.fileName && !post.mediaData" class="file-attachment"><a href="#" @click.prevent="downloadFile(post.fileData, post.fileName)">{{ post.fileName }}</a> ({{ formatFileSize(post.fileSize) }})</div>
+                </div>
+            </div>
+            <hr>
+            <div><h3>Написать ответ</h3>
+                <div class="form-group"><label>Имя:</label><input type="text" v-model="replyAuthor" placeholder="Никнейм"></div>
+                <div class="form-group" v-if="isAdmin"><label>Дата/время:</label><input type="datetime-local" v-model="replyDateTime"></div>
+                <div class="form-group"><label>Сообщение:</label><textarea v-model="replyText"></textarea></div>
+                <div class="form-group"><label>Отправить медиа:</label><input type="file" @change="handleReplyMedia" accept="image/*,video/mp4,video/webm,video/ogg"></div>
+                <div class="media-preview" v-if="replyMediaPreview">
+                    <img v-if="replyMediaType === 'image'" :src="replyMediaPreview">
+                    <video v-if="replyMediaType === 'video'" controls :src="replyMediaPreview" style="max-height:100px"></video>
+                    <button @click="clearReplyMedia" style="margin-left:8px;">X</button>
+                </div>
+                <div class="form-group"><label>Файл:</label><input type="file" @change="handleReplyFile" accept="*/*"><div v-if="replyFileName" class="file-attachment">{{ replyFileName }}</div></div>
+                <button @click="addReply">Отправить</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Новая тема -->
+    <div v-if="currentView === 'newTopic'">
+        <a href="#" class="back-link" @click.prevent="changeView('index')">Назад</a>
+        <div class="new-topic-panel"><h3>СОЗДАТЬ НОВУЮ ТЕМУ</h3>
+            <div class="form-group"><label>Имя:</label><input type="text" v-model="newTopicAuthor" placeholder="Никнейм"></div>
+            <div class="form-group"><label>Заголовок:</label><input type="text" v-model="newTopicTitle" placeholder="Тема"></div>
+            <div class="form-group" v-if="isAdmin"><label>Дата/время:</label><input type="datetime-local" v-model="newTopicDateTime"></div>
+            <div class="form-group"><label>Сообщение:</label><textarea v-model="newTopicBody"></textarea></div>
+            <div class="form-group"><label>Отправить медиа:</label><input type="file" @change="handleTopicMedia" accept="image/*,video/mp4,video/webm,video/ogg"></div>
+            <div class="media-preview" v-if="topicMediaPreview">
+                <img v-if="topicMediaType === 'image'" :src="topicMediaPreview">
+                <video v-if="topicMediaType === 'video'" controls :src="topicMediaPreview" style="max-height:100px"></video>
+                <button @click="clearTopicMedia">X</button>
+            </div>
+            <div class="form-group"><label>Файл:</label><input type="file" @change="handleTopicFile" accept="*/*"><div v-if="topicFileName" class="file-attachment">{{ topicFileName }}</div></div>
+            <button @click="createTopic">Создать тему</button>
+        </div>
+    </div>
+
+    <!-- Гайды -->
+    <div v-if="currentView === 'guides'">
+        <div class="guides-panel">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;"><h3>ГАЙДЫ ПО MINECRAFT</h3><button @click="openNewGuide">+ Новый гайд</button></div>
+            <div v-if="guides.length === 0" style="text-align:center; padding:20px;">Гайдов пока нет. Создайте первый!</div>
+            <div v-for="guide in guides" :key="guide.id" class="guide-list-item" @click="openGuide(guide)">
+                <div class="guide-list-title">{{ guide.title }}</div>
+                <div class="guide-list-meta">Автор: {{ guide.author }} | {{ formatDate(guide.createdAt) }}</div>
+            </div>
+        </div>
+        <a href="#" class="back-link" @click.prevent="changeView('index')">На главную</a>
+    </div>
+
+    <!-- Просмотр гайда -->
+    <div v-if="currentView === 'guideView' && currentGuide">
+        <a href="#" class="back-link" @click.prevent="changeView('guides')">К списку гайдов</a>
+        <div class="guide-view-panel">
+            <div v-if="!editingGuideContent">
+                <h2 style="margin-bottom: 10px;">{{ currentGuide.title }}</h2>
+                <div class="guide-list-meta" style="margin-bottom: 15px;">Автор: {{ currentGuide.author }} | {{ formatDate(currentGuide.createdAt) }}</div>
+                <div class="guide-full-content" @dblclick="startEditGuideContent">{{ currentGuide.content }}</div>
+                <div v-if="currentGuide.imageData" class="guide-image"><img :src="currentGuide.imageData" alt="guide image"></div>
+                <div v-if="canEditGuide(currentGuide)" class="guide-owner-actions">
+                    <button @click="startEditGuideContent">Редактировать содержание</button>
+                    <button @click="openGuideImageUpload">Изменить картинку</button>
+                    <button @click="editGuide(currentGuide)">Редактировать название</button>
+                    <button @click="deleteGuide(currentGuide.id)">Удалить гайд</button>
+                </div>
+            </div>
+            <div v-else class="guide-editor">
+                <h3>Редактирование содержания гайда</h3>
+                <textarea v-model="editGuideText" rows="10" style="width:100%; margin:10px 0;"></textarea>
+                <button @click="saveGuideContent">Сохранить</button>
+                <button @click="cancelEditGuideContent">Отмена</button>
+            </div>
+        </div>
+        <a href="#" class="back-link" @click.prevent="changeView('guides')">Назад к списку</a>
+    </div>
+
+    <!-- Хранилище -->
+    <div v-if="currentView === 'storage'">
+        <div class="storage-panel">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+                <h3>ХРАНИЛИЩЕ ФАЙЛОВ</h3>
+                <div>
+                    <input type="file" ref="storageFileInput" style="display:none" @change="uploadToStorage" multiple>
+                    <button @click="$refs.storageFileInput.click()">+ Загрузить файлы</button>
+                </div>
+            </div>
+            <div v-if="storageItems.length === 0" style="text-align:center; padding:30px;">Файлов пока нет. Загрузите изображения, видео или любые файлы.</div>
+            <div class="storage-grid">
+                <div v-for="item in storageItems" :key="item.id" class="storage-item">
+                    <div v-if="item.type === 'image'">
+                        <img :src="item.data" :alt="item.name">
+                    </div>
+                    <div v-else-if="item.type === 'video'">
+                        <video controls :src="item.data" style="max-height:150px"></video>
+                    </div>
+                    <div v-else class="file-icon">
+                        📄
+                    </div>
+                    <div class="storage-item-name">{{ item.name }}</div>
+                    <div class="storage-item-actions">
+                        <button @click="downloadStorageItem(item)">Скачать</button>
+                        <button @click="deleteStorageItem(item.id)" style="background:#A08070;">Удалить</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <a href="#" class="back-link" @click.prevent="changeView('index')">На главную</a>
+    </div>
+
+    <div class="footer"><span v-if="!isAdmin">{{ footerText }}</span><span v-else class="editable-text" @dblclick="startEdit('footer')">{{ footerText }}</span><input v-if="editing.footer && isAdmin" v-model="editValues.footer" @blur="saveEdit('footer')" style="width:400px; text-align:center;"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/vue@2.7.14/dist/vue.js"></script>
+<script>
+    function generateId() { return Date.now() + '-' + Math.random().toString(36).substr(2, 6); }
+    function parseDateTimeOrDefault(dt, fallback) { if(dt && dt.trim()){ let d=new Date(dt); if(!isNaN(d.getTime())) return d; } return fallback?fallback:new Date(); }
+
+    const app = new Vue({
+        el: '#app',
+        data: {
+            showLoginModal: false, showRegisterModal: false, showAvatarForUserModal: false, showGuideModal: false,
+            loginName: '', loginPassword: '', registerName: '', registerPassword: '',
+            avatarTargetUser: '', userAvatarTempFile: null, userAvatarPreviewTemp: null,
+            userAvatars: {}, myName: '',
+            topics: [], guides: [], storageItems: [],
+            currentView: 'index', currentTopicId: null, currentGuide: null,
+            onlineCount: Math.floor(Math.random() * 19) + 6,
+            editing: { tagline: false, footer: false, topicTitle: false },
+            editValues: { tagline: '', footer: '', topicTitle: '' },
+            taglineText: 'Форум посвященный майнкрафту.',
+            footerText: 'MINECRAFT DISCUSSION — гайды, видео, общение',
+            editingPost: null, editPostText: '',
+            editingStats: { totalTopics: false, totalMessages: false },
+            editStatsValues: { totalTopics: '', totalMessages: '' },
+            customTotalTopics: null, customTotalMessages: null,
+            currentPage: 1, topicsPerPage: 5,
+            replyAuthor: '', replyText: '', replyDateTime: '', replyMediaFile: null, replyMediaPreview: null, replyMediaType: '',
+            replyFile: null, replyFileName: '',
+            newTopicAuthor: '', newTopicTitle: '', newTopicBody: '', newTopicDateTime: '',
+            topicMediaFile: null, topicMediaPreview: null, topicMediaType: '',
+            topicFile: null, topicFileName: '',
+            activeDeleteMenu: null, activeTopicDeleteMenu: null,
+            guideFormTitle: '', guideFormContent: '', guideFormDateTime: '', guideFormImageFile: null, guideFormImagePreview: null, editingGuideId: null,
+            editingGuideContent: false, editGuideText: '',
+        },
+        computed: {
+            isAdmin() { return this.myName === 'AxoCory'; },
+            currentTopic() { return this.topics.find(t => t.id === this.currentTopicId) || null; },
+            currentPosts() { return this.currentTopic ? this.currentTopic.posts : []; },
+            actualTotalTopics() { return this.topics.length; },
+            actualTotalMessages() { return this.topics.reduce((s,t)=> s + (t.postsCount || t.posts.length), 0); },
+            displayTotalTopics() { return this.customTotalTopics !== null ? this.customTotalTopics : this.actualTotalTopics; },
+            displayTotalMessages() { return this.customTotalMessages !== null ? this.customTotalMessages : this.actualTotalMessages; },
+            totalPages() { return Math.max(1, Math.ceil(this.topics.length / this.topicsPerPage)); },
+            paginatedTopics() { return this.topics.slice((this.currentPage-1)*this.topicsPerPage, this.currentPage*this.topicsPerPage); },
+        },
+        mounted() {
+            this.loadData();
+            document.addEventListener('click', () => { this.activeDeleteMenu = null; this.activeTopicDeleteMenu = null; });
+            setInterval(()=>{ this.onlineCount = Math.floor(Math.random() * 20) + 5; }, 60000);
+        },
+        methods: {
+            // Экспорт/импорт
+            exportData() {
+                const exportData = {
+                    topics: this.topics,
+                    guides: this.guides,
+                    storageItems: this.storageItems,
+                    userAvatars: this.userAvatars,
+                    taglineText: this.taglineText,
+                    footerText: this.footerText,
+                    customTotalTopics: this.customTotalTopics,
+                    customTotalMessages: this.customTotalMessages,
+                    exportDate: new Date().toISOString()
+                };
+                const dataStr = JSON.stringify(exportData, null, 2);
+                const blob = new Blob([dataStr], {type: 'application/json'});
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `minecraft_forum_backup_${new Date().toISOString().slice(0,19)}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                alert("Данные экспортированы в JSON файл");
+            },
+            triggerImport() {
+                this.$refs.importFile.click();
+            },
+            importData(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const imported = JSON.parse(e.target.result);
+                        if (imported.topics) this.topics = imported.topics.map(t => ({
+                            ...t,
+                            createdAt: new Date(t.createdAt),
+                            posts: t.posts.map(p => ({ ...p, createdAt: new Date(p.createdAt) })),
+                            lastPostDate: t.lastPostDate ? new Date(t.lastPostDate) : null
+                        }));
+                        if (imported.guides) this.guides = imported.guides.map(g => ({ ...g, createdAt: new Date(g.createdAt) }));
+                        if (imported.storageItems) this.storageItems = imported.storageItems;
+                        if (imported.userAvatars) this.userAvatars = imported.userAvatars;
+                        if (imported.taglineText) this.taglineText = imported.taglineText;
+                        if (imported.footerText) this.footerText = imported.footerText;
+                        if (imported.customTotalTopics !== undefined) this.customTotalTopics = imported.customTotalTopics;
+                        if (imported.customTotalMessages !== undefined) this.customTotalMessages = imported.customTotalMessages;
+                        this.saveToLocal();
+                        alert("Импорт завершён! Страница будет обновлена.");
+                        location.reload();
+                    } catch(err) {
+                        alert("Ошибка при импорте: неверный формат файла");
+                    }
+                };
+                reader.readAsText(file);
+                this.$refs.importFile.value = '';
+            },
+            // Хранилище
+            async uploadToStorage(event) {
+                const files = event.target.files;
+                if (!files.length) return;
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    const dataUrl = await this.readFileAsDataURL(file);
+                    let type = 'file';
+                    if (file.type.startsWith('image/')) type = 'image';
+                    else if (file.type.startsWith('video/')) type = 'video';
+                    this.storageItems.unshift({
+                        id: generateId(),
+                        name: file.name,
+                        size: file.size,
+                        type: type,
+                        data: dataUrl,
+                        createdAt: new Date()
+                    });
+                }
+                this.saveToLocal();
+                alert(`Загружено ${files.length} файлов`);
+                this.$refs.storageFileInput.value = '';
+            },
+            downloadStorageItem(item) {
+                const a = document.createElement('a');
+                a.href = item.data;
+                a.download = item.name;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            },
+            deleteStorageItem(id) {
+                if (confirm("Удалить этот файл из хранилища?")) {
+                    this.storageItems = this.storageItems.filter(i => i.id !== id);
+                    this.saveToLocal();
+                }
+            },
+            canEditGuide(guide) { return this.isAdmin || (this.myName && guide.author === this.myName); },
+            openAvatarForUser(u) { this.avatarTargetUser = u; this.userAvatarTempFile = null; this.userAvatarPreviewTemp = null; this.showAvatarForUserModal = true; },
+            handleUserAvatarChange(e) { let f=e.target.files[0]; if(f && f.type.startsWith('image/')){ this.userAvatarTempFile=f; let fr=new FileReader(); fr.onload=ev=>{ this.userAvatarPreviewTemp=ev.target.result; }; fr.readAsDataURL(f); } },
+            async saveUserAvatar() { if(this.userAvatarTempFile) this.userAvatars[this.avatarTargetUser] = await this.readFileAsDataURL(this.userAvatarTempFile); this.saveToLocal(); this.showAvatarForUserModal=false; this.$forceUpdate(); },
+            removeUserAvatar() { delete this.userAvatars[this.avatarTargetUser]; this.saveToLocal(); this.showAvatarForUserModal=false; this.$forceUpdate(); },
+            getAvatar(u) { return this.userAvatars[u] || null; },
+            async doLogin() { let n=this.loginName.trim(); if(!n){alert("Введите никнейм");return;} this.myName=n; this.showLoginModal=false; this.saveToLocal(); },
+            async doRegister() { let n=this.registerName.trim(); if(!n){alert("Введите никнейм");return;} this.myName=n; this.showRegisterModal=false; this.saveToLocal(); },
+            logout() { this.myName=''; this.saveToLocal(); this.changeView('index'); },
+            loadData() {
+                let saved = localStorage.getItem('mc_discussion_final_v7');
+                if(saved) { 
+                    try { 
+                        let p = JSON.parse(saved); 
+                        this.topics = (p.topics || []).map(t => ({
+                            ...t, 
+                            createdAt: new Date(t.createdAt),
+                            posts: (t.posts || []).map(p => ({ 
+                                ...p, 
+                                createdAt: new Date(p.createdAt),
+                                mediaData: p.mediaData || null,
+                                mediaType: p.mediaType || null,
+                                fileData: p.fileData || null,
+                                fileName: p.fileName || null,
+                                fileSize: p.fileSize || null
+                            })),
+                            lastPostDate: t.lastPostDate ? new Date(t.lastPostDate) : null
+                        }));
+                        this.guides = (p.guides || []).map(g => ({ ...g, createdAt: new Date(g.createdAt), imageData: g.imageData || null }));
+                        this.storageItems = p.storageItems || [];
+                        this.userAvatars = p.userAvatars || {};
+                        this.taglineText = p.taglineText || 'Форум посвященный майнкрафту.';
+                        this.footerText = p.footerText || 'MINECRAFT DISCUSSION — гайды, видео, общение';
+                        this.customTotalTopics = p.customTotalTopics;
+                        this.customTotalMessages = p.customTotalMessages;
+                    } catch(e) { console.error(e); this.initEmpty(); } 
+                } else { this.initEmpty(); }
+            },
+            initEmpty() { this.topics=[]; this.guides=[]; this.storageItems=[]; this.userAvatars={}; this.taglineText='Форум посвященный майнкрафту.'; this.footerText='MINECRAFT DISCUSSION — гайды, видео, общение'; this.saveToLocal(); },
+            saveToLocal() {
+                let toStore = {
+                    topics: this.topics.map(t => ({
+                        ...t,
+                        createdAt: t.createdAt.toISOString(),
+                        posts: t.posts.map(p => ({ 
+                            ...p, 
+                            createdAt: p.createdAt.toISOString(),
+                            mediaData: p.mediaData || null,
+                            mediaType: p.mediaType || null,
+                            fileData: p.fileData || null,
+                            fileName: p.fileName || null,
+                            fileSize: p.fileSize || null
+                        })),
+                        lastPostDate: t.lastPostDate ? t.lastPostDate.toISOString() : null
+                    })),
+                    guides: this.guides.map(g => ({ 
+                        ...g, 
+                        createdAt: g.createdAt.toISOString(),
+                        imageData: g.imageData || null
+                    })),
+                    storageItems: this.storageItems,
+                    userAvatars: this.userAvatars,
+                    taglineText: this.taglineText,
+                    footerText: this.footerText,
+                    customTotalTopics: this.customTotalTopics,
+                    customTotalMessages: this.customTotalMessages
+                };
+                localStorage.setItem('mc_discussion_final_v7', JSON.stringify(toStore));
+            },
+            formatDate(d) { if(!d) return '—'; let date=new Date(d); return `${date.getDate()}.${date.getMonth()+1}.${date.getFullYear()} ${date.getHours()}:${date.getMinutes().toString().padStart(2,'0')}`; },
+            formatFileSize(b){ if(!b) return '0 байт'; if(b<1024) return b+' байт'; if(b<1048576) return (b/1024).toFixed(1)+' КБ'; return (b/1048576).toFixed(1)+' МБ'; },
+            downloadFile(url,name){ let a=document.createElement('a'); a.href=url; a.download=name; document.body.appendChild(a); a.click(); document.body.removeChild(a); },
+            readFileAsDataURL(f){ return new Promise(r=>{ let fr=new FileReader(); fr.onload=e=>r(e.target.result); fr.readAsDataURL(f); }); },
+            refreshData() { this.saveToLocal(); alert("Данные сохранены"); },
+            prevPage() { if(this.currentPage>1) this.currentPage--; },
+            nextPage() { if(this.currentPage<this.totalPages) this.currentPage++; },
+            goToPage(p) { this.currentPage=p; },
+            startEditStats(f){ this.editStatsValues[f]=this[f==='totalTopics'?'displayTotalTopics':'displayTotalMessages'].toString(); this.editingStats[f]=true; },
+            saveEditStats(f){ let v=parseInt(this.editStatsValues[f]); if(!isNaN(v)&&v>=0){ if(f==='totalTopics') this.customTotalTopics=v; else this.customTotalMessages=v; } else { if(f==='totalTopics') this.customTotalTopics=null; else this.customTotalMessages=null; } this.editingStats[f]=false; this.saveToLocal(); },
+            startEdit(field){ this.editValues[field]=this[field==='tagline'?'taglineText':field==='footer'?'footerText':this.currentTopic?this.currentTopic.title:'']; this.editing[field]=true; },
+            saveEdit(field){ if(field==='tagline') this.taglineText=this.editValues.tagline; if(field==='footer') this.footerText=this.editValues.footer; this.editing[field]=false; this.saveToLocal(); },
+            saveTopicTitle(){ if(this.currentTopic){ this.currentTopic.title=this.editValues.topicTitle; this.editing.topicTitle=false; this.saveToLocal(); } },
+            changeView(v,id=null){ this.currentView=v; this.activeDeleteMenu=null; this.activeTopicDeleteMenu=null; this.editingGuideContent=false; if(v==='thread'&&id) this.currentTopicId=id; else if(v==='index'){ this.currentTopicId=null; this.currentPage=1; this.topics.forEach(t=>{ if(t.posts.length) t.lastPostDate=t.posts[t.posts.length-1].createdAt; }); this.saveToLocal(); } else if(v==='newTopic'){ this.newTopicAuthor=''; this.newTopicTitle=''; this.newTopicBody=''; this.newTopicDateTime=''; this.clearTopicMedia(); this.clearTopicFile(); } else if(v==='guideView'){ this.currentGuide=id; } },
+            openThread(id){ this.changeView('thread',id); },
+            toggleTopicDeleteMenu(id){ this.activeTopicDeleteMenu=this.activeTopicDeleteMenu===id?null:id; },
+            deleteTopic(id){ if(this.isAdmin && confirm("Удалить тему?")){ let i=this.topics.findIndex(t=>t.id===id); if(i!==-1){ this.topics.splice(i,1); if(this.currentTopicId===id) this.changeView('index'); this.saveToLocal(); if(this.customTotalTopics!==null) this.customTotalTopics=null; if(this.customTotalMessages!==null) this.customTotalMessages=null; } } this.activeTopicDeleteMenu=null; },
+            toggleDeleteMenu(id){ this.activeDeleteMenu=this.activeDeleteMenu===id?null:id; },
+            deletePost(id){ if(!this.isAdmin) return; if(!this.currentTopic) return; let i=this.currentTopic.posts.findIndex(p=>p.id===id); if(i!==-1){ if(this.currentTopic.posts.length===1 && confirm("Удалить всю тему?")){ let ti=this.topics.findIndex(t=>t.id===this.currentTopic.id); if(ti!==-1){ this.topics.splice(ti,1); this.changeView('index'); } } else { this.currentTopic.posts.splice(i,1); let last=this.currentTopic.posts[this.currentTopic.posts.length-1]; this.currentTopic.lastPostDate=last?last.createdAt:this.currentTopic.createdAt; this.currentTopic.lastPostAuthor=last?last.author:null; this.currentTopic.postsCount=this.currentTopic.posts.length; this.saveToLocal(); if(this.customTotalMessages!==null) this.customTotalMessages=null; this.$forceUpdate(); } } this.activeDeleteMenu=null; },
+            handleReplyMedia(e){ let f=e.target.files[0]; if(f){ this.replyMediaFile=f; let fr=new FileReader(); fr.onload=ev=>{ this.replyMediaPreview=ev.target.result; if(f.type.startsWith('image/')) this.replyMediaType='image'; else if(f.type.startsWith('video/')) this.replyMediaType='video'; }; fr.readAsDataURL(f); } },
+            clearReplyMedia(){ this.replyMediaFile=null; this.replyMediaPreview=null; this.replyMediaType=''; },
+            handleReplyFile(e){ let f=e.target.files[0]; if(f){ this.replyFile=f; this.replyFileName=f.name; } else this.clearReplyFile(); },
+            clearReplyFile(){ this.replyFile=null; this.replyFileName=''; },
+            handleTopicMedia(e){ let f=e.target.files[0]; if(f){ this.topicMediaFile=f; let fr=new FileReader(); fr.onload=ev=>{ this.topicMediaPreview=ev.target.result; if(f.type.startsWith('image/')) this.topicMediaType='image'; else if(f.type.startsWith('video/')) this.topicMediaType='video'; }; fr.readAsDataURL(f); } },
+            clearTopicMedia(){ this.topicMediaFile=null; this.topicMediaPreview=null; this.topicMediaType=''; },
+            handleTopicFile(e){ let f=e.target.files[0]; if(f){ this.topicFile=f; this.topicFileName=f.name; } else this.clearTopicFile(); },
+            clearTopicFile(){ this.topicFile=null; this.topicFileName=''; },
+            async addReply(){
+                if(!this.currentTopic) return;
+                let a=this.replyAuthor.trim()||"Аноним";
+                if(!this.replyText.trim()){ alert("Введите текст"); return; }
+                let d = this.isAdmin && this.replyDateTime ? parseDateTimeOrDefault(this.replyDateTime, new Date()) : new Date();
+                let mediaData=null, mediaType=null;
+                if(this.replyMediaFile){ mediaData=await this.readFileAsDataURL(this.replyMediaFile); mediaType=this.replyMediaType; }
+                let fileData=null, fileName=null, fileSize=null;
+                if(this.replyFile){ fileData=await this.readFileAsDataURL(this.replyFile); fileName=this.replyFile.name; fileSize=this.replyFile.size; }
+                this.currentTopic.posts.push({ id:generateId(), author:a, text:this.replyText.trim(), createdAt:d, mediaData, mediaType, fileData, fileName, fileSize });
+                this.currentTopic.lastPostDate=d; this.currentTopic.lastPostAuthor=a; this.currentTopic.postsCount=this.currentTopic.posts.length;
+                this.saveToLocal(); if(this.customTotalMessages!==null) this.customTotalMessages=null;
+                this.replyText=""; this.replyAuthor=""; this.replyDateTime=""; this.clearReplyMedia(); this.clearReplyFile();
+            },
+            async createTopic(){
+                let a=this.newTopicAuthor.trim()||"Игрок", t=this.newTopicTitle.trim(), b=this.newTopicBody.trim();
+                if(!t){ alert("Введите заголовок"); return; }
+                if(!b){ alert("Введите сообщение"); return; }
+                let d = this.isAdmin && this.newTopicDateTime ? parseDateTimeOrDefault(this.newTopicDateTime, new Date()) : new Date();
+                let mediaData=null, mediaType=null;
+                if(this.topicMediaFile){ mediaData=await this.readFileAsDataURL(this.topicMediaFile); mediaType=this.topicMediaType; }
+                let fileData=null, fileName=null, fileSize=null;
+                if(this.topicFile){ fileData=await this.readFileAsDataURL(this.topicFile); fileName=this.topicFile.name; fileSize=this.topicFile.size; }
+                let newTopic = { id:generateId(), title:t, author:a, createdAt:d, posts:[{ id:generateId(), author:a, text:b, createdAt:d, mediaData, mediaType, fileData, fileName, fileSize }], lastPostDate:d, lastPostAuthor:a, postsCount:1 };
+                this.topics.unshift(newTopic); this.saveToLocal(); if(this.customTotalTopics!==null) this.customTotalTopics=null; if(this.customTotalMessages!==null) this.customTotalMessages=null;
+                this.newTopicAuthor=""; this.newTopicTitle=""; this.newTopicBody=""; this.newTopicDateTime=""; this.clearTopicMedia(); this.clearTopicFile();
+                this.changeView('index'); alert(`Тема "${t}" создана`);
+            },
+            handleGuideImage(e){ let f=e.target.files[0]; if(f&&f.type.startsWith('image/')){ this.guideFormImageFile=f; let fr=new FileReader(); fr.onload=ev=>{ this.guideFormImagePreview=ev.target.result; }; fr.readAsDataURL(f); } },
+            clearGuideImage(){ this.guideFormImageFile=null; this.guideFormImagePreview=null; },
+            openNewGuide(){ this.editingGuideId=null; this.guideFormTitle=''; this.guideFormContent=''; this.guideFormDateTime=''; this.guideFormImageFile=null; this.guideFormImagePreview=null; this.showGuideModal=true; },
+            openGuide(guide){ this.currentGuide=guide; this.changeView('guideView', guide); },
+            editGuide(g){ this.editingGuideId=g.id; this.guideFormTitle=g.title; this.guideFormContent=g.content; this.guideFormDateTime=''; this.guideFormImageFile=null; this.guideFormImagePreview=null; this.showGuideModal=true; },
+            startEditGuideContent(){ this.editGuideText = this.currentGuide.content; this.editingGuideContent = true; },
+            cancelEditGuideContent(){ this.editingGuideContent = false; },
+            async saveGuideContent(){ if(this.currentGuide && this.canEditGuide(this.currentGuide)){ this.currentGuide.content = this.editGuideText; this.editingGuideContent = false; this.saveToLocal(); alert("Содержание гайда обновлено"); } },
+            openGuideImageUpload(){ let input = document.createElement('input'); input.type = 'file'; input.accept = 'image/*'; input.onchange = async (e) => { let f = e.target.files[0]; if(f && this.currentGuide && this.canEditGuide(this.currentGuide)){ this.currentGuide.imageData = await this.readFileAsDataURL(f); this.saveToLocal(); this.$forceUpdate(); alert("Изображение гайда обновлено"); } }; input.click(); },
+            async saveGuide(){ 
+                if(!this.guideFormTitle.trim()){ alert("Введите название"); return; } 
+                if(!this.guideFormContent.trim()){ alert("Введите содержание"); return; } 
+                let dt = this.isAdmin && this.guideFormDateTime ? parseDateTimeOrDefault(this.guideFormDateTime, new Date()) : new Date();
+                let imageData = this.guideFormImageFile ? await this.readFileAsDataURL(this.guideFormImageFile) : null;
+                if(this.editingGuideId){ 
+                    let idx=this.guides.findIndex(g=>g.id===this.editingGuideId); 
+                    if(idx!==-1){ 
+                        if(this.isAdmin || this.guides[idx].author===this.myName){ 
+                            this.guides[idx].title=this.guideFormTitle; 
+                            this.guides[idx].content=this.guideFormContent; 
+                            if(this.isAdmin) this.guides[idx].createdAt=dt;
+                            if(imageData) this.guides[idx].imageData = imageData;
+                        } else { alert("Нет прав"); return; } 
+                    } 
+                } else { 
+                    this.guides.unshift({ id:generateId(), title:this.guideFormTitle, content:this.guideFormContent, author:this.myName||"Аноним", createdAt:dt, imageData:imageData }); 
+                } 
+                this.saveToLocal(); 
+                this.showGuideModal=false;
+                if(this.currentView==='guideView' && this.currentGuide && this.editingGuideId===this.currentGuide.id) this.currentGuide.content=this.guideFormContent;
+            },
+            deleteGuide(id){ let guide=this.guides.find(g=>g.id===id); if(guide && (this.isAdmin || guide.author===this.myName) && confirm("Удалить гайд?")){ this.guides=this.guides.filter(g=>g.id!==id); this.saveToLocal(); if(this.currentGuide && this.currentGuide.id===id) this.changeView('guides'); } }
+        }
+    });
+</script>
+</body>
+</html>
