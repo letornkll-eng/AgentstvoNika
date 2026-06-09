@@ -491,7 +491,7 @@
     <div v-if="showGuideModal" class="modal-overlay"><div class="modal-window"><h2>{{ editingGuide ? 'Редактировать гайд' : 'Новый гайд' }}</h2><input type="text" v-model="guideFormTitle" placeholder="Название"><textarea v-model="guideFormContent" placeholder="Содержание гайда..."></textarea><div v-if="isAdmin" class="datetime-row" style="margin:10px 0;"><label>Дата/время:</label><input type="datetime-local" v-model="guideFormDateTime"></div><div class="form-group"><label>Картинка гайда:</label><input type="file" @change="handleGuideImage" accept="image/*"></div><div class="media-preview" v-if="guideFormImagePreview"><img :src="guideFormImagePreview" style="max-width:200px;"><button @click="clearGuideImage">X</button></div><button @click="saveGuide">Сохранить</button><button @click="showGuideModal=false">Отмена</button></div></div>
 
     <div class="header">
-        <h1>MINECRAFT DISCUSSION</h1>
+        <h1>ФОРУМ ДЕТЕКТИВА</h1>
         <div class="tagline"><span v-if="!isAdmin">{{ taglineText }}</span><span v-else class="editable-text" @dblclick="startEdit('tagline')">{{ taglineText }}</span><input v-if="editing.tagline && isAdmin" v-model="editValues.tagline" @blur="saveEdit('tagline')" style="width:300px; text-align:center;"></div>
     </div>
 
